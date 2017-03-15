@@ -79,7 +79,8 @@
 
     # docker 서비스 레지스트리 등 세팅
     vi /usr/lib/systemd/system/docker.service
-    ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --insecure-registry docker-registry:5000
+    ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock \
+    --insecure-registry docker-registry:5000
 
     # docker-registry IP 등록
     vi /etc/hosts
