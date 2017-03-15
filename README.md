@@ -3,7 +3,9 @@
 ## 목차
 1. PC, workstation, server 등 CentOS7 설치
 2. docker 설치
-
+3. libvirtd 설치
+4. 베이스 이미지 복사
+5. docker compose 설치 및 지앤클라우드 올인원 실행
 -
 
 
@@ -145,9 +147,11 @@
     ```
     # 설치
     yum -y install qemu-kvm libvirt virt-install bridge-utils install arp-scan genisoimage
+    systemctl enable libvirtd
+    systemctl start libvirtd
     ```
 
-- 설정 후 작업
+- 설치 후 작업
 
     ```
     # git 설치 및 실행에 필요한 스크립트 등 다운로드
@@ -173,5 +177,76 @@
     echo "password: fastcat=1151" >> /var/lib/gncloud/KVM/script/initcloud/user-data
     echo "chpasswd: {expire: False}" >> /var/lib/gncloud/KVM/script/initcloud/user-data
     echo "ssh_pwauth: true" >> /var/lib/gncloud/KVM/script/initcloud/user-data
+    echo "runcmd:" >> /var/lib/gncloud/KVM/script/initcloud/user-data
+    echo " - [ sh, -c, echo \" `cat ~/.ssh/id_rsa.pub`\" >> ~/.ssh/authorized_keys ] " >> \
+        /var/lib/gncloud/KVM/script/initcloud/user-data
 
+    # 기본  가상 네트워크 삭제
+    virsh net-destroy default
+
+    cd ~
+    # libvirt pool 생성
+    # pool.xml 파일 HDD의 크기에 따라 용량을 다르게 함
+    > pool.xml
+    echo "<pool type='dir'>" >> pool.xml
+    echo "   <name>gnpool</name>" >> pool.xml
+    echo "   <capacity unit='G'>330</capacity>" >> pool.xml
+    echo "   <allocation unit='G'>20</allocation>" >> pool.xml
+    echo "   <available unit='G'>350</available>" >> pool.xml
+    echo "   <source>" >> pool.xml
+    echo "   </source>" >> pool.xml
+    echo "   <target>" >> pool.xml
+    echo "     <path>/data/local/images/kvm/instance</path>" >> pool.xml
+    echo "     <permissions>" >> pool.xml
+    echo "       <mode>0755</mode>" >> pool.xml
+    echo "       <owner>0</owner>" >> pool.xml
+    echo "       <group>0</group>" >> pool.xml
+    echo "     </permissions>" >> pool.xml
+    echo "   </target>" >> pool.xml
+    echo " </pool>" >> pool.xml
+
+    # libvirt pool 정의 및 자동 실행
+    virsh pool-define pool.xml
+    virsh pool-autostart default
+    virsh pool-autostart gnpool
+    ```
+
+<span></span>
+4. 베이스 이미지 복사
+-------------
+
+- 베이스 이미지 다운로드
+
+    ```
+    # centos6.8
+    http://cloud.centos.org/centos/6/images/CentOS-6-x86_64-GenericCloud.qcow2
+    # centos7
+    http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
+    # ubuntu 14.04
+    https://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img
+    # ubuntu 16.04
+    https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-amd64-disk1.img
+    # ubuntu 16.10
+    https://cloud-images.ubuntu.com/releases/16.10/release/ubuntu-16.10-server-cloudimg-amd64.img
+
+    # 다운로드 후 /data/nas/images/kvm/base 디렉토리 아래 복사
+
+   ```
+
+<span></span>
+5. docker compose 설치 및 지앤클라우드 올인원 실행
+-------------
+
+- docker compose 설치
+
+    ```
+    # curl을 통한 실행 파일 다운로드
+    curl -L "https://github.com/docker/compose/releases/download/1.11.1/docker-compose-$(uname -s)-$(uname -m)" \
+    -o /usr/local/bin/docker-compose
+
+    chmod +x /usr/local/bin/docker-compose
+
+    # 지앤클라우드 올인원 실행
+    cd /var/lib/gncloud-all-in-one/KVM
+    docker-compose up -d
     ```

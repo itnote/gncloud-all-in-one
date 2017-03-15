@@ -1,0 +1,123 @@
+version: '2'
+services:
+  web:
+    image: gncloud/gncloud-web
+    restart: always
+    volumes:
+      - /var/log/nginx:/var/log/nginx
+      - /etc/localtime:/etc/localtime
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - db
+      - manager
+      - kvm
+      - docker
+      - hyperv
+      - scheduler
+
+  db:
+    image: gncloud/gncloud-mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: gncloud
+      MYSQL_DATABASE: gncloud
+      MYSQL_USER: gncloud
+      MYSQL_PASSWORD: gncloud
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /data/mysql:/var/lib/mysql
+
+  manager:
+    image: gncloud/gncloud-manager
+    volumes:
+      - /var/log/gncloud:/var/log/gncloud
+      - /root/.ssh:/root/.ssh
+      - /etc/localtime:/etc/localtime
+    restart: always
+    environment:
+      WSGI_PROCESSES: 4
+      WSGI_THREADS: 2
+    depends_on:
+      - db
+
+  kvm:
+    image: gncloud/gncloud-kvm
+    volumes:
+      - /var/log/gncloud:/var/log/gncloud
+      - /root/.ssh:/root/.ssh
+      - /etc/localtime:/etc/localtime
+    restart: always
+    environment:
+      WSGI_PROCESSES: 4
+      WSGI_THREADS: 2
+      NETWORK_DRIVE: /data/nas
+      LOCAL_DRIVE: /data/local
+    depends_on:
+      - db
+
+
+  hyperv:
+    image: gncloud/gncloud-hyperv
+    volumes:
+      - /var/log/gncloud:/var/log/gncloud
+      - /root/.ssh:/root/.ssh
+      - /etc/localtime:/etc/localtime
+    restart: always
+    environment:
+      WSGI_PROCESSES: 4
+      WSGI_THREADS: 2
+      LOCAL_DRIVE_LETTER: C
+      NETWORK_DRIVE_LETTER: C
+    depends_on:
+      - db
+
+
+  docker:
+    image: gncloud/gncloud-docker
+    volumes:
+      - /var/log/gncloud:/var/log/gncloud
+      - /root/.ssh:/root/.ssh
+      - /etc/localtime:/etc/localtime
+    restart: always
+    environment:
+      WSGI_PROCESSES: 4
+      WSGI_THREADS: 2
+    depends_on:
+      - db
+
+
+  scheduler:
+    image: gncloud/gncloud-scheduler
+    volumes:
+      - /var/log/gncloud:/var/log/gncloud
+      - /root/.ssh:/root/.ssh
+      - /etc/localtime:/etc/localtime
+    restart: always
+    environment:
+      WSGI_PROCESSES: 1
+      WSGI_THREADS: 2
+      LOCAL_DRIVE_LETTER: C
+      NETWORK_DRIVE_LETTER: C
+      NETWORK_DRIVE: /data/nas
+      LOCAL_DRIVE: /data/local
+    depends_on:
+      - db
+
+  registry:
+    image: gncloud/gncloud-registry
+    volumes:
+      - /data/registry:/var/lib/registry
+    ports:
+      - "5000:5000"
+
+
+# ssh-keygen -f ~/.ssh/id_rsa
+# ssh-copy-id -i ~/.ssh/id_rsa.pub root@192.168.1.2
+# ssh-copy-id -i ~/.ssh/id_rsa.pub root@192.168.1.201
+# ssh-copy-id -i ~/.ssh/id_rsa.pub root@192.168.1.202
+# ssh-copy-id -i ~/.ssh/id_rsa.pub root@192.168.1.203
+# ssh-copy-id -i ~/.ssh/id_rsa.pub root@192.168.1.204
