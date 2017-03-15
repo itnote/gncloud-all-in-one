@@ -4,8 +4,11 @@
 1. PC, workstation, server 등 CentOS7 설치
 2. docker 설치
 
--------------
+
+
+
 <span></span>
+
 1. PC, workstation, server 등 CentOS7 설치
 -------------
 
