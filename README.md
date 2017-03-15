@@ -12,14 +12,14 @@
 
 <span></span>
 
-## 1. PC, workstation, server 등 CentOS7 설치
+1. PC, workstation, server 등 CentOS7 설치
 -------------
 
 - CentOS7 ISO 이미지 다운로
 
-    - libvirt의 manager 관리를 위하여 gnome으로 설치한다.
 
     ```
+    # libvirt의 manager 관리를 위하여 gnome으로 설치한다.
     # 다운로드 링크
     http://mirror.oasis.onnetcorp.com/centos/7/isos/x86_64/CentOS-7-x86_64-DVD-1611.iso
     http://ftp.neowiz.com/centos/7/isos/x86_64/CentOS-7-x86_64-DVD-1611.iso
