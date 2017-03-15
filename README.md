@@ -6,7 +6,9 @@
 3. libvirtd 설치
 4. 베이스 이미지 복사
 5. docker compose 설치 및 지앤클라우드 올인원 실행
--
+
+```
+```
 
 
 <span></span>
