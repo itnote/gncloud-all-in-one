@@ -149,7 +149,7 @@
     yum -y install epel-release
     yum -y install git
     mkdir /data/git
-    cd git
+    cd /data/git
     git clone https://github.com/gncloud/gncloud-all-in-one.git
 
     # 실제 수행 디렉토리 생성 및 복사
