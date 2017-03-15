@@ -4,7 +4,7 @@
 1. PC, workstation, server 등 CentOS7 설치
 2. docker 설치
 
-
+-
 
 
 <span></span>
@@ -27,11 +27,13 @@
     http://mirror.navercorp.com/centos/7/isos/x86_64/CentOS-7-x86_64-DVD-1611.iso
     ```
 
+
 <span></span>
 2. docker 설치
 -------------
 
 - 사전 작업
+
 
     ```
     # 패키지 업데이트
@@ -91,6 +93,85 @@
     [IP]  docker-registry
     # IP 확인은
     #﻿ip addr | grep inet | grep -v inet6 | grep -v 127.0.0.1 | tr -s ' ' | cut -d' ' -f3 | cut -d/ -f1 결과
-    # echo "`ip addr | grep inet | grep -v inet6 | grep -v 127.0.0.1 | tr -s ' ' | cut -d' ' -f3 | cut -d/ -f1` docker-registry" >> /etc/hosts
+    # echo "`ip addr | grep inet | grep -v inet6 | grep -v 127.0.0.1 | tr -s ' ' | \
+    cut -d' ' -f3 | cut -d/ -f1` docker-registry" >> /etc/hosts
+
+    # docker 서비스 시작
+    docker enable docker
+    docker start docker
+    ```
+
+<span></span>
+3. libvirtd 설치
+-------------
+
+- 사전 작업
+
+    ```
+    # 네트워크 세팅
+    > /etc/sysconfig/network-scripts/ifcfg-br0
+    echo “DEVICE=br0>> /etc/sysconfig/network-scripts/ifcfg-br0
+    echo “TYPE=Bridge>> /etc/sysconfig/network-scripts/ifcfg-br0
+    echo “BOOTPROTO=static>> /etc/sysconfig/network-scripts/ifcfg-br0
+    echo “ONBOOT=yes>> /etc/sysconfig/network-scripts/ifcfg-br0
+    echo “DELAY=0>> /etc/sysconfig/network-scripts/ifcfg-br0
+
+    # IP를 고정시키기 위해 IP정보와 GATEWAY정보를 얻어야 함
+    echo “IPADDR=192.168.1.5>> /etc/sysconfig/network-scripts/ifcfg-br0
+    echo “NETMASK=255.255.255.0>> /etc/sysconfig/network-scripts/ifcfg-br0
+    echo “GATEWAY=192.168.1.1>> /etc/sysconfig/network-scripts/ifcfg-br0
+    echo “DNS1=168.126.63.1>> /etc/sysconfig/network-scripts/ifcfg-br0
+
+    # network interface 이름이 eth0 또는 enp2s0 등
+    ip addr # <= 명령어로 확인 가능. 아래 예는 enp2s0 임
+
+    >/etc/sysconfig/network-scripts/ifcfg-enp2s0
+    echo “TYPE=Ethernet” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
+    echo “BOOTPROTO=static” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
+    echo “NAME=enp2s0” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
+    echo “DEVICE=enp2s0” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
+    echo “ONBOOT=yes” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
+    echo “BRIDGE=br0 ” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
+
+    # NetworkManager는 disable 해야 하고 network를 이용함
+    systemctl disable NetworkManager
+    systemctl stop NetworkManager
+    systemctl restart network
+    chkconfig network on
+    ```
+
+- libvirtd 설치
+
+    ```
+    # 설치
+    yum -y install qemu-kvm libvirt virt-install bridge-utils install arp-scan genisoimage
+    ```
+
+- 설정 후 작업
+
+    ```
+    # git 설치 및 실행에 필요한 스크립트 등 다운로드
+    yum -y install epel-release
+    yum -y install git
+    mkdir /data/git
+    cd git
+    git clone https://github.com/gncloud/gncloud-all-in-one.git
+
+    # 실제 수행 디렉토리 생성 및 복사
+    mkdir -p /var/lib/gncloud/KVM
+
+    cp -R /data/git/gncloud/KVM /var/lib/gncloud/KVM
+    chmod 777 /var/lib/gncloud/KVM/script/*sh
+
+    # ssh key 생성 및 내부 컨테이너 접근이 가능하도록 키 복사
+    ssh-keygen -f ~/.ssh/id_rsa
+    cp ~/.ssh/id_rsa.pub authorized_keys
+
+    # user-data 생성
+    > /var/lib/gncloud/KVM/script/initcloud/user-data
+    echo "#cloud-config" >> /var/lib/gncloud/KVM/script/initcloud/user-data
+    echo "password: fastcat=1151" >> /var/lib/gncloud/KVM/script/initcloud/user-data
+    echo "chpasswd: {expire: False}" >> /var/lib/gncloud/KVM/script/initcloud/user-data
+    echo "ssh_pwauth: true" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 
     ```
