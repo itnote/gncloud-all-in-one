@@ -1,18 +1,8 @@
 # 지앤클라우드 올인원 버전 인스톨 가이드 (CentOS7)
 
-## 목차
-1. PC, workstation, server 등 CentOS7 설치
-2. docker 설치
-3. libvirtd 설치
-4. 베이스 이미지 복사
-5. docker compose 설치 및 지앤클라우드 올인원 실행
-
-
-
 
 <span></span>
-
-1. PC, workstation, server 등 CentOS7 설치
+## 1. PC, workstation, server 등 CentOS7 설치
 -------------
 
 - CentOS7 ISO 이미지 다운로
@@ -32,7 +22,7 @@
 
 
 <span></span>
-2. docker 설치
+## 2. docker 설치
 -------------
 
 - 사전 작업
@@ -105,7 +95,7 @@
     ```
 
 <span></span>
-3. libvirtd 설치
+## 3. libvirtd 설치
 -------------
 
 - 사전 작업
@@ -213,7 +203,7 @@
     ```
 
 <span></span>
-4. 베이스 이미지 복사
+## 4. 베이스 이미지 복사
 -------------
 
 - 베이스 이미지 다운로드
@@ -235,7 +225,7 @@
    ```
 
 <span></span>
-5. docker compose 설치 및 지앤클라우드 올인원 실행
+## 5. docker compose 설치 및 지앤클라우드 올인원 실행
 -------------
 
 - docker compose 설치
