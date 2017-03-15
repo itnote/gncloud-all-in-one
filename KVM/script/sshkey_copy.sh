@@ -1,0 +1,2 @@
+#! /bin/bash
+genisoimage -output /var/lib/gncloud/KVM/script/initcloud/config.iso -volid cidata -joliet -rock /var/lib/gncloud/KVM/script/initcloud/user-data /var/lib/gncloud/KVM/script/initcloud/meta-data
