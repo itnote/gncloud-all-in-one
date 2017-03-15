@@ -148,7 +148,7 @@
     # git 설치 및 실행에 필요한 스크립트 등 다운로드
     yum -y install epel-release
     yum -y install git
-    mkdir /data/git
+    mkdir -p /data/git
     cd /data/git
     git clone https://github.com/gncloud/gncloud-all-in-one.git
 
