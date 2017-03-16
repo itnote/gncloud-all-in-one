@@ -1,8 +1,8 @@
-# 지앤클라우드 올인원 버전 인스톨 가이드 (CentOS7)
+# 지앤클라우드 올인원 버전 인스톨 가이드 (CentOS7) - 설치 시간 약 50분 내외, 네트워크 등의 상황에 따라 변동이 있을 수 있음
 
 
 <span></span>
-## 1. PC, workstation, server 등 CentOS7 설치
+## 1. PC, workstation, server 등 CentOS7 설치 (minimal 설치 시 설치 시간 약 20분)
 -------------
 
 - CentOS7 ISO 이미지 다운로
@@ -22,10 +22,10 @@
 
 
 <span></span>
-## 2. docker 설치
+## 2. docker 설치 (7분)
 -------------
 
-- 사전 작업
+- 사전 작업 (약 2분)
 
 
     ```
@@ -59,7 +59,7 @@
     mkdir -p /data/nas/images/kvm/backup
     ```
 
-- docker 1.12.5 버전 설치
+- docker 1.12.5 버전 설치 (5분 내외)
 
 
     ```
@@ -96,10 +96,10 @@
     ```
 
 <span></span>
-## 3. libvirtd 설치
+## 3. libvirtd 설치 (6분)
 -------------
 
-- 사전 작업
+- 사전 작업 (1분)
 
     ```
     # 네트워크 세팅
@@ -134,7 +134,7 @@
     chkconfig network on
     ```
 
-- libvirtd 설치
+- libvirtd 설치 (2분)
 
     ```
     # 설치
@@ -143,7 +143,7 @@
     systemctl start libvirtd
     ```
 
-- 설치 후 작업
+- 설치 후 작업 (3분)
 
     ```
     # git 설치 및 실행에 필요한 스크립트 등 다운로드
@@ -204,7 +204,7 @@
     ```
 
 <span></span>
-## 4. 베이스 이미지 복사
+## 4. 베이스 이미지 복사 (usb로 복사 시 약 5분)
 -------------
 
 - 베이스 이미지 다운로드
@@ -226,7 +226,7 @@
    ```
 
 <span></span>
-## 5. docker compose 설치 및 지앤클라우드 올인원 실행
+## 5. docker compose 설치 및 지앤클라우드 올인원 실행 (8분)
 -------------
 
 - docker compose 설치
