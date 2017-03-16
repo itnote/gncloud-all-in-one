@@ -62,10 +62,24 @@ mv /var/lib/docker /data/docker
 ln -s /data/docker docker
 
 # docker registry 설정 및 호스트 아이피 등록
+
 #vi /usr/lib/systemd/system/docker.service
 #ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --insecure-registry docker-registry:5000
-sed -i "s/ExecStart=\/usr\/bin\/dockerd/ExecStart=\/usr\/bin\/dockerd -H tcp:\/\/0.0.0.0:2375 -H unix:\/\/\/var\/run\/docker.sock --insecure-registry docker-registry:5000/g" \
-/usr/lib/systemd/system/docker.service
+#sed -i "s/ExecStart=\/usr\/bin\/dockerd/ExecStart=\/usr\/bin\/dockerd -H tcp:\/\/0.0.0.0:2375 -H unix:\/\/\/var\/run\/docker.sock --insecure-registry docker-registry:5000/g" \
+#/usr/lib/systemd/system/docker.service
+
+# 1.12.5 버전은
+#    vi /etc/sysconfig/docker-network
+#    DOCKER_NETWORK_OPTIONS=-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
+sed -i "s/DOCKER_NETWORK_OPTIONS=/DOCKER_NETWORK_OPTIONS=-H tcp:\/\/0.0.0.0:2375 -H unix:\/\/\/var\/run\/docker.sock/g" /etc/sysconfig/docker-network
+#    vi /etc/sysconfig/docker-storage
+#    DOCKER_STORAGE_OPTIONS=--insecure-registry docker-registry:5000
+sed -i "s/DOCKER_STORAGE_OPTIONS=/DOCKER_STORAGE_OPTIONS=--insecure-registry docker-registry:5000/g" /etc/sysconfig/docker-storage
+# swarm mode enable
+#    vi /etc/docker/daemon.json
+#    false
+sed -i "s/true/false/g" /etc/docker/daemon.json
+
 #vi /etc/hosts
 #192.168.1.5  docker-registry 추가
 echo "`ip addr | grep inet | grep -v inet6 | grep -v 127.0.0.1 | tr -s ' ' | \

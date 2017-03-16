@@ -78,9 +78,18 @@
     ln -s /data/docker /var/lib/docker
 
     # docker 서비스 레지스트리 등 세팅
-    vi /usr/lib/systemd/system/docker.service
-    ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock \
-    --insecure-registry docker-registry:5000
+    #vi /usr/lib/systemd/system/docker.service
+    #ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock \
+    #--insecure-registry docker-registry:5000
+    vi /etc/sysconfig/docker-network
+    DOCKER_NETWORK_OPTIONS=-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
+
+    vi /etc/sysconfig/docker-storage
+    DOCKER_STORAGE_OPTIONS=--insecure-registry docker-registry:5000
+
+    # swarm mode enable
+    vi /etc/docker/daemon.json
+    false
 
     # docker-registry IP 등록
     vi /etc/hosts
