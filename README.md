@@ -249,9 +249,10 @@
 
     # 지앤클라우드 올인원 실행
     # selinux 를 해결 하기 위해 지앤클라우드 올인원을 실행 하기 전에 리부팅 필요
-    cd /var/lib/gncloud-all-in-one/KVM
+    cp /var/lib/gncloud-all-in-one/docker-compose.yml ~/.
+    cd ~
     docker-compose up -d
 
-    docker swarm init --advertise-addr [IP]
+    # docker swarm init --advertise-addr [IP]
     ```
 

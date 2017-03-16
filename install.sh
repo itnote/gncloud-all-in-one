@@ -9,6 +9,7 @@ systemctl stop firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 
 mkdir -p /var/log/gncloud
+mkdir -p /home/data
 ln -s /home/data /data
 mkdir -p /data/mysql
 mkdir -p /data/registry
@@ -30,6 +31,8 @@ echo 'gpgkey=https://yum.dockerproject.org/gpg' >> /etc/yum.repos.d/docker.repo
 # libvirtd와 docker가 서로 상호 동작 하기 위해서 docker 버전을 1.12.5로 맞추어야 한다.
 # 그렇지않으면  DHCP 서버로 부터 KVM 인스턴스가 IP를 얻어오지 못한다.
 yum -y install docker-1.12.5
+
+
 
 # kvm libvirt 를 위한 네트워크 세팅
 > /etc/sysconfig/network-scripts/ifcfg-br0
@@ -148,9 +151,8 @@ curl -L "https://github.com/docker/compose/releases/download/1.11.1/docker-compo
 chmod +x /usr/local/bin/docker-compose
 
 # docker 그룹으로 gncloud의 그룹 변경 /etc/passwd
-## login gncloud
-# su - gncloud
-# cp /data/git/gncloud/docker-compose.yml .
-# docker-compose up
+cp /data/git/gncloud-all-in-one/docker-compose.yml ~/.
+cd ~
+docker-compose up
 # docker swarm init --advertise-addr 192.168.1.5
 
