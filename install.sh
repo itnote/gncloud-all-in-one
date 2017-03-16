@@ -6,8 +6,7 @@ yum -y update
 # 도커 서비스를 위해 호스트 이름은 manager로 세팅
 systemctl disable firewalld
 systemctl stop firewalld
-       setsebool httpd_can_network_connect on -P
-
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 
 mkdir -p /var/log/gncloud
 ln -s /home/data /data
@@ -18,16 +17,19 @@ mkdir -p /data/nas/images/kvm/base
 mkdir -p /data/nas/images/kvm/snapshot
 mkdir -p /data/nas/images/kvm/backup
 
+# 베이스이비지 복사
+# USB 등
+# /data/nas/images/kvm/base 디렉토리에 복사
+
 # docker install
 >/etc/yum.repos.d/docker.repo echo '[dockerrepo]' >> /etc/yum.repos.d/docker.repo
 echo 'name=Docker Repository' >> /etc/yum.repos.d/docker.repo
 echo 'baseurl=https://yum.dockerproject.org/repo/main/centos/7/' >> /etc/yum.repos.d/docker.repo
 echo 'enabled=1' >> /etc/yum.repos.d/docker.repo echo 'gpgcheck=1' >> /etc/yum.repos.d/docker.repo
 echo 'gpgkey=https://yum.dockerproject.org/gpg' >> /etc/yum.repos.d/docker.repo
-# yum -y install docker-engine
 # libvirtd와 docker가 서로 상호 동작 하기 위해서 docker 버전을 1.12.5로 맞추어야 한다.
 # 그렇지않으면  DHCP 서버로 부터 KVM 인스턴스가 IP를 얻어오지 못한다.
-yum install docker-1.12.5
+yum -y install docker-1.12.5
 
 # kvm libvirt 를 위한 네트워크 세팅
 > /etc/sysconfig/network-scripts/ifcfg-br0
@@ -60,11 +62,14 @@ mv /var/lib/docker /data/docker
 ln -s /data/docker docker
 
 # docker registry 설정 및 호스트 아이피 등록
-vi /usr/lib/systemd/system/docker.service
-ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --insecure-registry docker-registry:5000
-vi /etc/hosts
-192.168.1.5  docker-registry 추가
-#
+#vi /usr/lib/systemd/system/docker.service
+#ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --insecure-registry docker-registry:5000
+sed -i "s/ExecStart=\/usr\/bin\/dockerd/ExecStart=\/usr\/bin\/dockerd -H tcp:\/\/0.0.0.0:2375 -H unix:\/\/\/var\/run\/docker.sock --insecure-registry docker-registry:5000/g" \
+/usr/lib/systemd/system/docker.service
+#vi /etc/hosts
+#192.168.1.5  docker-registry 추가
+echo "`ip addr | grep inet | grep -v inet6 | grep -v 127.0.0.1 | tr -s ' ' | \
+    cut -d' ' -f3 | cut -d/ -f1` docker-registry" >> /etc/hosts
 
 yum -y install epel-release
 yum -y install git
@@ -89,10 +94,9 @@ echo "#cloud-config" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "password: fastcat=1151" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "chpasswd: {expire: False}" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "ssh_pwauth: true" >> /var/lib/gncloud/KVM/script/initcloud/user-data
-echo "ssh_authorized_keys:" >> /var/lib/gncloud/KVM/script/initcloud/user-data
-cat ~/.ssh/id_rsa.pub >> /var/lib/gncloud/KVM/script/initcloud/user-data
-vi user-data
-ssh-rsa 앞에 -와 공백을  삽입한다.
+echo "runcmd:" >> /var/lib/gncloud/KVM/script/initcloud/user-data
+echo " - [ sh, -c, echo \" `cat ~/.ssh/id_rsa.pub`\" >> ~/.ssh/authorized_keys ] " >> \
+    /var/lib/gncloud/KVM/script/initcloud/user-data
 
 systemctl enable libvirtd
 systemctl start libvirtd
@@ -124,10 +128,6 @@ echo " </pool>" >> pool.xml
 virsh pool-define pool.xml
 virsh pool-autostart default
 virsh pool-autostart gnpool
-
-# 베이스이미지가 있는 호스트에서 베이스이비지 복사
-scp root@192.168.1.2:/data/nas/images/kvm/base/* /data/nas/images/kvm/base/.
-
 
 # docker-compose install
 curl -L "https://github.com/docker/compose/releases/download/1.11.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
