@@ -58,19 +58,31 @@
     mkdir -p /data/nas/images/kvm/snapshot
     mkdir -p /data/nas/images/kvm/backup
     ```
+- 네트워크 정보 세팅
+    ```
+    yum -y install net-tools
 
+    # 네트워크 정보 저장
+    export IPADDR=`ip addr | grep inet | grep -v inet6 | grep -v 127.0.0.1 | tr -s ' ' |  cut -d' ' -f3 | cut -d/ -f1`
+    export IP_HEAD=`echo $IPADDR | cut -d'.' -f1-2`
+    export GATEWAY=`netstat -rn | grep $IP_HEAD | grep UG | tr -s ' ' | cut -d' ' -f2`
+    export NETMASK=`netstat -rn | grep $IP_HEAD | grep -v UG | tr -s ' ' | cut -d' ' -f3`
+    export NET_NAME=ifcfg-$(netstat -rn | grep $IP_HEAD | grep UG | tr -s ' ' | cut -d' ' -f 8)
+    ```
 - docker 1.12.5 버전 설치 (5분 내외)
 
 
     ```
+    # docker yum repo 설정
     >/etc/yum.repos.d/docker.repo echo '[dockerrepo]' >> /etc/yum.repos.d/docker.repo
     echo 'name=Docker Repository' >> /etc/yum.repos.d/docker.repo
     echo 'baseurl=https://yum.dockerproject.org/repo/main/centos/7/' >> /etc/yum.repos.d/docker.repo
     echo 'enabled=1' >> /etc/yum.repos.d/docker.repo echo 'gpgcheck=1' >> /etc/yum.repos.d/docker.repo
     echo 'gpgkey=https://yum.dockerproject.org/gpg' >> /etc/yum.repos.d/docker.repo
-    # yum -y install docker-engine
+
     # libvirtd와 docker가 서로 상호 동작 하기 위해서 docker 버전을 1.12.5로 맞추어야 한다.
     # 그렇지않으면  DHCP 서버로 부터 KVM 인스턴스가 IP를 얻어오지 못한다.
+
     yum -y install docker-1.12.5
 
     # docker 디렉토리를 /data로 옮김
@@ -78,26 +90,20 @@
     ln -s /data/docker /var/lib/docker
 
     # docker 서비스 레지스트리 등 세팅
-    #vi /usr/lib/systemd/system/docker.service
-    #ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock \
-    #--insecure-registry docker-registry:5000
-    vi /etc/sysconfig/docker-network
-    DOCKER_NETWORK_OPTIONS=-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
+  	sed -i "s/DOCKER_NETWORK_OPTIONS=/DOCKER_NETWORK_OPTIONS=-H tcp:\/\/0.0.0.0:2375 -H unix:\/\/\/var\/run\/docker.sock/g" /etc/sysconfig/docker-network
+   	sed -i "s/DOCKER_STORAGE_OPTIONS=/DOCKER_STORAGE_OPTIONS=--insecure-registry docker-registry:5000/g" /etc/sysconfig/docker-storage
+   	sed -i "s/true/false/g" /etc/docker/daemon.json
 
-    vi /etc/sysconfig/docker-storage
-    DOCKER_STORAGE_OPTIONS=--insecure-registry docker-registry:5000
-
+    #vi /etc/sysconfig/docker-network
+    #DOCKER_NETWORK_OPTIONS=-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
+    #vi /etc/sysconfig/docker-storage
+    #DOCKER_STORAGE_OPTIONS=--insecure-registry docker-registry:5000
     # swarm mode enable
-    vi /etc/docker/daemon.json
-    false
+    #vi /etc/docker/daemon.json
+    #false
 
-    # docker-registry IP 등록
-    vi /etc/hosts
-    [IP]  docker-registry
-    # IP 확인은
-    #﻿ip addr | grep inet | grep -v inet6 | grep -v 127.0.0.1 | tr -s ' ' | cut -d' ' -f3 | cut -d/ -f1 결과
-    # echo "`ip addr | grep inet | grep -v inet6 | grep -v 127.0.0.1 | tr -s ' ' | \
-    cut -d' ' -f3 | cut -d/ -f1` docker-registry" >> /etc/hosts
+    # docker-registry /etc/hosts에 추가
+    echo "$IPADDR docker-registry" >> /etc/hosts
 
     # docker 서비스 시작
     docker enable docker
@@ -120,21 +126,20 @@
     echo “DELAY=0>> /etc/sysconfig/network-scripts/ifcfg-br0
 
     # IP를 고정시키기 위해 IP정보와 GATEWAY정보를 얻어야 함
-    echo “IPADDR=192.168.1.5>> /etc/sysconfig/network-scripts/ifcfg-br0
-    echo “NETMASK=255.255.255.0>> /etc/sysconfig/network-scripts/ifcfg-br0
-    echo “GATEWAY=192.168.1.1>> /etc/sysconfig/network-scripts/ifcfg-br0
-    echo “DNS1=168.126.63.1>> /etc/sysconfig/network-scripts/ifcfg-br0
+    echo "IPADDR=$IPADDR" >> /etc/sysconfig/network-scripts/ifcfg-br0
+    echo "NETMASK=$NETMASK" >> /etc/sysconfig/network-scripts/ifcfg-br0
+    echo "GATEWAY=$GATEWAY" >> /etc/sysconfig/network-scripts/ifcfg-br0
+    echo "DNS1=8.8.8.8" >> /etc/sysconfig/network-scripts/ifcfg-br0
 
     # network interface 이름이 eth0 또는 enp2s0 등
-    ip addr # <= 명령어로 확인 가능. 아래 예는 enp2s0 임
 
-    >/etc/sysconfig/network-scripts/ifcfg-enp2s0
-    echo “TYPE=Ethernet” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
-    echo “BOOTPROTO=static” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
-    echo “NAME=enp2s0” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
-    echo “DEVICE=enp2s0” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
-    echo “ONBOOT=yes” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
-    echo “BRIDGE=br0 ” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
+    >/etc/sysconfig/network-scripts/$NET_NAME
+    echo "TYPE=Ethernet" >>/etc/sysconfig/network-scripts/$NET_NAME
+    echo "BOOTPROTO=static" >>/etc/sysconfig/network-scripts/$NET_NAME
+    echo "NAME=$NET_NAME" >>/etc/sysconfig/network-scripts/$NET_NAME
+    echo "DEVICE=$NET_NAME" >>/etc/sysconfig/network-scripts/$NET_NAME
+    echo "ONBOOT=yes" >>/etc/sysconfig/network-scripts/$NET_NAME
+    echo "BRIDGE=br0" >>/etc/sysconfig/network-scripts/$NET_NAME
 
     # NetworkManager는 disable 해야 하고 network를 이용함
     systemctl disable NetworkManager
@@ -253,6 +258,6 @@
     cd ~
     docker-compose up -d
 
-    # docker swarm init --advertise-addr [IP]
+    docker swarm init --advertise-addr $IPADDR
     ```
 

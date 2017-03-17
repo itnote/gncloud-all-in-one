@@ -8,6 +8,15 @@ systemctl disable firewalld
 systemctl stop firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 
+yum -y install net-tools
+
+# 네트워크 정보 저장
+export IPADDR=`ip addr | grep inet | grep -v inet6 | grep -v 127.0.0.1 | tr -s ' ' |  cut -d' ' -f3 | cut -d/ -f1`
+export IP_HEAD=`echo $IPADDR | cut -d'.' -f1-2`
+export GATEWAY=`netstat -rn | grep $IP_HEAD | grep UG | tr -s ' ' | cut -d' ' -f2`
+export NETMASK=`netstat -rn | grep $IP_HEAD | grep -v UG | tr -s ' ' | cut -d' ' -f3`
+export NET_NAME=ifcfg-$(netstat -rn | grep $IP_HEAD | grep UG | tr -s ' ' | cut -d' ' -f 8)
+
 mkdir -p /var/log/gncloud
 mkdir -p /home/data
 ln -s /home/data /data
@@ -22,6 +31,36 @@ mkdir -p /data/nas/images/kvm/backup
 # USB 등
 # /data/nas/images/kvm/base 디렉토리에 복사
 
+
+# kvm libvirt 를 위한 네트워크 세팅
+# IPADDR, GATEWAY, NETMASK 는 직접 수정 하여야 한다
+> /etc/sysconfig/network-scripts/ifcfg-br0
+echo "DEVICE=br0" >> /etc/sysconfig/network-scripts/ifcfg-br0
+echo "TYPE=Bridge" >> /etc/sysconfig/network-scripts/ifcfg-br0
+echo "BOOTPROTO=static" >> /etc/sysconfig/network-scripts/ifcfg-br0
+echo "ONBOOT=yes" >> /etc/sysconfig/network-scripts/ifcfg-br0
+echo "DELAY=0" >> /etc/sysconfig/network-scripts/ifcfg-br0
+echo "IPADDR=$IPADDR" >> /etc/sysconfig/network-scripts/ifcfg-br0
+echo "NETMASK=$NETMASK" >> /etc/sysconfig/network-scripts/ifcfg-br0
+echo "GATEWAY=$GATEWAY" >> /etc/sysconfig/network-scripts/ifcfg-br0
+echo "DNS1=8.8.8.8" >> /etc/sysconfig/network-scripts/ifcfg-br0
+
+#
+>/etc/sysconfig/network-scripts/$NET_NAME
+echo "TYPE=Ethernet" >>/etc/sysconfig/network-scripts/$NET_NAME
+echo "BOOTPROTO=static" >>/etc/sysconfig/network-scripts/$NET_NAME
+echo "NAME=enp2s0" >>/etc/sysconfig/network-scripts/$NET_NAME
+echo "DEVICE=enp2s0" >>/etc/sysconfig/network-scripts/$NET_NAME
+echo "ONBOOT=yes" >>/etc/sysconfig/network-scripts/$NET_NAME
+echo "BRIDGE=br0" >>/etc/sysconfig/network-scripts/$NET_NAME
+
+systemctl disable NetworkManager
+systemctl restart network
+systemctl stop NetworkManager
+chkconfig network on
+#
+
+
 # docker install
 >/etc/yum.repos.d/docker.repo echo '[dockerrepo]' >> /etc/yum.repos.d/docker.repo
 echo 'name=Docker Repository' >> /etc/yum.repos.d/docker.repo
@@ -31,34 +70,6 @@ echo 'gpgkey=https://yum.dockerproject.org/gpg' >> /etc/yum.repos.d/docker.repo
 # libvirtd와 docker가 서로 상호 동작 하기 위해서 docker 버전을 1.12.5로 맞추어야 한다.
 # 그렇지않으면  DHCP 서버로 부터 KVM 인스턴스가 IP를 얻어오지 못한다.
 yum -y install docker-1.12.5
-
-
-
-# kvm libvirt 를 위한 네트워크 세팅
-> /etc/sysconfig/network-scripts/ifcfg-br0
-echo “DEVICE=br0>> /etc/sysconfig/network-scripts/ifcfg-br0
-echo “TYPE=Bridge>> /etc/sysconfig/network-scripts/ifcfg-br0
-echo “BOOTPROTO=static>> /etc/sysconfig/network-scripts/ifcfg-br0
-echo “ONBOOT=yes>> /etc/sysconfig/network-scripts/ifcfg-br0
-echo “DELAY=0>> /etc/sysconfig/network-scripts/ifcfg-br0
-echo “IPADDR=192.168.1.5>> /etc/sysconfig/network-scripts/ifcfg-br0
-echo “NETMASK=255.255.255.0>> /etc/sysconfig/network-scripts/ifcfg-br0
-echo “GATEWAY=192.168.1.1>> /etc/sysconfig/network-scripts/ifcfg-br0
-echo “DNS1=168.126.63.1>> /etc/sysconfig/network-scripts/ifcfg-br0
-#
->/etc/sysconfig/network-scripts/ifcfg-enp2s0
-echo “TYPE=Ethernet” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
-echo “BOOTPROTO=static” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
-echo “NAME=enp2s0” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
-echo “DEVICE=enp2s0” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
-echo “ONBOOT=yes” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
-echo “BRIDGE=br0 ” >>/etc/sysconfig/network-scripts/ifcfg-enp2s0
-
-systemctl disable NetworkManager
-systemctl restart network
-systemctl stop NetworkManager
-chkconfig network on
-#
 
 # docker 디렉토리를 /data로 옮김
 mv /var/lib/docker /data/docker
@@ -83,15 +94,13 @@ sed -i "s/DOCKER_STORAGE_OPTIONS=/DOCKER_STORAGE_OPTIONS=--insecure-registry doc
 #    false
 sed -i "s/true/false/g" /etc/docker/daemon.json
 
-#vi /etc/hosts
-#192.168.1.5  docker-registry 추가
-echo "`ip addr | grep inet | grep -v inet6 | grep -v 127.0.0.1 | tr -s ' ' | \
-    cut -d' ' -f3 | cut -d/ -f1` docker-registry" >> /etc/hosts
+# docker-registry /etc/hosts에 추가
+echo "$IPADDR docker-registry" >> /etc/hosts
 
 yum -y install epel-release
 yum -y install git
-mkdir /data/git
-cd git
+mkdir -p /data/git
+cd /data/git
 git clone https://github.com/gncloud/gncloud.git
 mkdir -p /var/lib/gncloud/KVM/script/initcloud
 cp -R /data/git/gncloud/KVM/script/* /var/lib/gncloud/KVM/script/initcloud/.
@@ -154,5 +163,5 @@ chmod +x /usr/local/bin/docker-compose
 cp /data/git/gncloud-all-in-one/docker-compose.yml ~/.
 cd ~
 docker-compose up
-# docker swarm init --advertise-addr 192.168.1.5
+docker swarm init --advertise-addr $IPADDR
 
