@@ -51,8 +51,8 @@ echo "DNS1=8.8.8.8" >> /etc/sysconfig/network-scripts/ifcfg-br0
 >/etc/sysconfig/network-scripts/$NET_NAME
 echo "TYPE=Ethernet" >>/etc/sysconfig/network-scripts/$NET_NAME
 echo "BOOTPROTO=static" >>/etc/sysconfig/network-scripts/$NET_NAME
-echo "NAME=enp2s0" >>/etc/sysconfig/network-scripts/$NET_NAME
-echo "DEVICE=enp2s0" >>/etc/sysconfig/network-scripts/$NET_NAME
+echo "NAME=$NET_NAME" >>/etc/sysconfig/network-scripts/$NET_NAME
+echo "DEVICE=$NET_NAME" >>/etc/sysconfig/network-scripts/$NET_NAME
 echo "ONBOOT=yes" >>/etc/sysconfig/network-scripts/$NET_NAME
 echo "BRIDGE=br0" >>/etc/sysconfig/network-scripts/$NET_NAME
 
