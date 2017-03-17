@@ -155,6 +155,8 @@ echo "   </target>" >> pool.xml
 echo " </pool>" >> pool.xml
 
 virsh pool-define pool.xml
+virsh pool-start default
+virsh pool-start gnpool
 virsh pool-autostart default
 virsh pool-autostart gnpool
 

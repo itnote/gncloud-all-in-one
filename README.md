@@ -213,6 +213,8 @@
 
     # libvirt pool 정의 및 자동 실행
     virsh pool-define pool.xml
+    virsh pool-start default
+    virsh pool-start gnpool
     virsh pool-autostart default
     virsh pool-autostart gnpool
     ```
