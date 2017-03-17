@@ -73,7 +73,7 @@ yum -y install docker-1.12.5
 
 # docker 디렉토리를 /data로 옮김
 mv /var/lib/docker /data/docker
-ln -s /data/docker docker
+ln -s /data/docker /var/lib/docker
 
 # docker registry 설정 및 호스트 아이피 등록
 
@@ -96,6 +96,9 @@ sed -i "s/true/false/g" /etc/docker/daemon.json
 
 # docker-registry /etc/hosts에 추가
 echo "$IPADDR docker-registry" >> /etc/hosts
+
+systemctl enable docker
+systemctl start docker
 
 yum -y install epel-release
 yum -y install git
