@@ -264,4 +264,11 @@
 
     docker swarm init --advertise-addr $IPADDR
     ```
-
+- 로그파일의 쓰기권한
+    ```
+    # docker 버전에 따라 로그파일의 쓰기권한이 필요할수 있다
+    # chmod 777 /var
+    # chmod 777 /var/log
+    # chmod 777 /var/log/nginx
+    # chmod 777 /var/log/gncloud
+    ```

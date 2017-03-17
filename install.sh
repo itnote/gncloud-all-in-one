@@ -170,6 +170,12 @@ chmod +x /usr/local/bin/docker-compose
 
 # docker 그룹으로 gncloud의 그룹 변경 /etc/passwd
 cp /data/git/gncloud-all-in-one/docker-compose.yml ~/.
+
+# docker 버전에 따라 로그파일의 쓰기권한이 필요할수 있다
+# chmod 777 /var
+# chmod 777 /var/log
+# chmod 777 /var/log/nginx
+# chmod 777 /var/log/gncloud
 cd ~
 docker-compose up
 docker swarm init --advertise-addr $IPADDR
