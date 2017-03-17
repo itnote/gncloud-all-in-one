@@ -27,6 +27,8 @@ mkdir -p /data/nas/images/kvm/base
 mkdir -p /data/nas/images/kvm/snapshot
 mkdir -p /data/nas/images/kvm/backup
 
+mkdir -p /var/lib/gncloud
+
 # 베이스이비지 복사
 # USB 등
 # /data/nas/images/kvm/base 디렉토리에 복사
@@ -104,17 +106,19 @@ yum -y install epel-release
 yum -y install git
 mkdir -p /data/git
 cd /data/git
-git clone https://github.com/gncloud/gncloud.git
-mkdir -p /var/lib/gncloud/KVM/script/initcloud
-cp -R /data/git/gncloud/KVM/script/* /var/lib/gncloud/KVM/script/initcloud/.
-chmod 777 /var/lib/gncloud/KVM/script/initcloud/*sh
+git clone https://github.com/gncloud/gncloud-all-in-one.git
+cp -R /data/git/gncloud-all-in-one/KVM /var/lib/gncloud/KVM
+cp /data/git/gncloud-all-in-one/docker-compose.yml ~/docker-compose.yml
+chmod 777 /var/lib/gncloud/KVM/script/*sh
+
+rm -rf /data/git
 
 # libvirt 설치
 yum -y install qemu-kvm libvirt virt-install bridge-utils install arp-scan genisoimage
 
 # ssh key 생성 및 내부 컨테이너 접근이 가능하도록 키 복사
 ssh-keygen -f ~/.ssh/id_rsa
-cp ~/.ssh/id_rsa.pub authorized_keys
+cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 
 # user-data 생성
 cp -R initcloud/ /var/lib/libvirt/.

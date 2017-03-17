@@ -57,6 +57,9 @@
     mkdir -p /data/nas/images/kvm/base
     mkdir -p /data/nas/images/kvm/snapshot
     mkdir -p /data/nas/images/kvm/backup
+
+    # kvm host 동작을 위한 스크립트
+    mkdir -p /var/lib/gncloud
     ```
 - 네트워크 정보 세팅
     ```
@@ -166,12 +169,11 @@
     mkdir -p /data/git
     cd /data/git
     git clone https://github.com/gncloud/gncloud-all-in-one.git
-
-    # 실제 수행 디렉토리 생성 및 복사
-    mkdir -p /var/lib/gncloud/KVM
-
-    cp -R /data/git/gncloud/KVM /var/lib/gncloud/KVM
+    cp -R /data/git/gncloud-all-in-one/KVM /var/lib/gncloud/KVM
+    cp /data/git/gncloud-all-in-one/docker-compose.yml ~/docker-compose.yml
     chmod 777 /var/lib/gncloud/KVM/script/*sh
+
+    rm -rf /data/git
 
     # ssh key 생성 및 내부 컨테이너 접근이 가능하도록 키 복사
     ssh-keygen -f ~/.ssh/id_rsa
