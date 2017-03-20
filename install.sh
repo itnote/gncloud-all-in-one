@@ -181,7 +181,7 @@ curl -L "https://github.com/docker/compose/releases/download/1.11.1/docker-compo
 chmod +x /usr/local/bin/docker-compose
 
 cd ~
-docker-compose up
+docker-compose up -d
 docker swarm init --advertise-addr $IPADDR
 
 # user-data를 kvm container에 복사
