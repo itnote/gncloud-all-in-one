@@ -9,6 +9,7 @@ systemctl stop firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 
 yum -y install net-tools
+yum -y install bridge-utils
 
 # 네트워크 정보 저장
 export IPADDR=`ip addr | grep inet | grep -v inet6 | grep -v 127.0.0.1 | tr -s ' ' |  cut -d' ' -f3 | cut -d/ -f1`
