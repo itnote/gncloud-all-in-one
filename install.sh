@@ -51,11 +51,11 @@ echo "DNS1=8.8.8.8" >> /etc/sysconfig/network-scripts/ifcfg-br0
 #
 >/etc/sysconfig/network-scripts/$NET_NAME
 echo "TYPE=Ethernet" >>/etc/sysconfig/network-scripts/$NET_NAME
-echo "BOOTPROTO=static" >>/etc/sysconfig/network-scripts/$NET_NAME
 echo "NAME=$NET_DEV" >>/etc/sysconfig/network-scripts/$NET_NAME
 echo "DEVICE=$NET_DEV" >>/etc/sysconfig/network-scripts/$NET_NAME
 echo "ONBOOT=yes" >>/etc/sysconfig/network-scripts/$NET_NAME
 echo "BRIDGE=br0" >>/etc/sysconfig/network-scripts/$NET_NAME
+echo "NM_CONTROLLED=no" >> /etc/sysconfig/network-scripts/$NET_NAME
 
 systemctl disable NetworkManager
 systemctl restart network
