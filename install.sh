@@ -16,6 +16,7 @@ export IP_HEAD=`echo $IPADDR | cut -d'.' -f1-2`
 export GATEWAY=`netstat -rn | grep $IP_HEAD | grep UG | tr -s ' ' | cut -d' ' -f2`
 export NETMASK=`netstat -rn | grep $IP_HEAD | grep -v UG | tr -s ' ' | cut -d' ' -f3`
 export NET_NAME=ifcfg-$(netstat -rn | grep $IP_HEAD | grep UG | tr -s ' ' | cut -d' ' -f 8)
+export NET_DEV=$(netstat -rn | grep $IP_HEAD | grep UG | tr -s ' ' | cut -d' ' -f 8)
 
 mkdir -p /var/log/gncloud
 mkdir -p /home/data
@@ -51,8 +52,8 @@ echo "DNS1=8.8.8.8" >> /etc/sysconfig/network-scripts/ifcfg-br0
 >/etc/sysconfig/network-scripts/$NET_NAME
 echo "TYPE=Ethernet" >>/etc/sysconfig/network-scripts/$NET_NAME
 echo "BOOTPROTO=static" >>/etc/sysconfig/network-scripts/$NET_NAME
-echo "NAME=$NET_NAME" >>/etc/sysconfig/network-scripts/$NET_NAME
-echo "DEVICE=$NET_NAME" >>/etc/sysconfig/network-scripts/$NET_NAME
+echo "NAME=$NET_DEV" >>/etc/sysconfig/network-scripts/$NET_NAME
+echo "DEVICE=$NET_DEV" >>/etc/sysconfig/network-scripts/$NET_NAME
 echo "ONBOOT=yes" >>/etc/sysconfig/network-scripts/$NET_NAME
 echo "BRIDGE=br0" >>/etc/sysconfig/network-scripts/$NET_NAME
 
@@ -121,7 +122,7 @@ ssh-keygen -f ~/.ssh/id_rsa
 cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 
 # user-data 생성
-cp -R initcloud/ /var/lib/libvirt/.
+
 > /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "#cloud-config" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "password: fastcat=1151" >> /var/lib/gncloud/KVM/script/initcloud/user-data
@@ -172,10 +173,10 @@ chmod +x /usr/local/bin/docker-compose
 cp /data/git/gncloud-all-in-one/docker-compose.yml ~/.
 
 # docker 버전에 따라 로그파일의 쓰기권한이 필요할수 있다
-# chmod 777 /var
-# chmod 777 /var/log
-# chmod 777 /var/log/nginx
-# chmod 777 /var/log/gncloud
+chmod 777 /var
+chmod 777 /var/log
+chmod 777 /var/log/nginx
+chmod 777 /var/log/gncloud
 cd ~
 docker-compose up
 docker swarm init --advertise-addr $IPADDR
