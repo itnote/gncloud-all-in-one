@@ -1,5 +1,19 @@
 #!/bin/bash
 
+
+mkdir -p /var/log/gncloud
+mkdir -p /home/data
+ln -s /home/data /data
+mkdir -p /data/mysql
+mkdir -p /data/registry
+mkdir -p /data/local/images/kvm/instance
+mkdir -p /data/nas/images/kvm/base
+mkdir -p /data/nas/images/kvm/snapshot
+mkdir -p /data/nas/images/kvm/backup
+
+mkdir -p /var/lib/gncloud
+mkdir -p /var/log/nginx
+
 # 지앤클라우드 all in one 버전 설치
 # 인스톨 쉘을 다운로드 받기 전에 해야 하는
 yum -y update
@@ -28,19 +42,6 @@ export GATEWAY=`netstat -rn | grep $IP_HEAD | grep UG | tr -s ' ' | cut -d' ' -f
 export NETMASK=`netstat -rn | grep $IP_HEAD | grep -v UG | tr -s ' ' | cut -d' ' -f3`
 export NET_NAME=ifcfg-$(netstat -rn | grep $IP_HEAD | grep UG | tr -s ' ' | cut -d' ' -f 8)
 export NET_DEV=$(netstat -rn | grep $IP_HEAD | grep UG | tr -s ' ' | cut -d' ' -f 8)
-
-mkdir -p /var/log/gncloud
-mkdir -p /home/data
-ln -s /home/data /data
-mkdir -p /data/mysql
-mkdir -p /data/registry
-mkdir -p /data/local/images/kvm/instance
-mkdir -p /data/nas/images/kvm/base
-mkdir -p /data/nas/images/kvm/snapshot
-mkdir -p /data/nas/images/kvm/backup
-
-mkdir -p /var/lib/gncloud
-mkdir -p /var/log/nginx
 
 # docker 버전에 따라 로그파일의 쓰기권한이 필요할수 있다
 chmod 777 /var
