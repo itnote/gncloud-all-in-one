@@ -185,3 +185,7 @@ cd ~
 docker-compose up
 docker swarm init --advertise-addr $IPADDR
 
+# user-data를 kvm container에 복사
+tar -cv /var/lib/gncloud/KVM/script/initcloud/user-data | docker exec -i root_kvm_1 tar x -C /var/lib/gncloud/KVM/script/initcloud/user-data
+
+
