@@ -130,6 +130,8 @@ echo "#cloud-config" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "password: fastcat=1151" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "chpasswd: {expire: False}" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "ssh_pwauth: true" >> /var/lib/gncloud/KVM/script/initcloud/user-data
+echo "ssh_authorized_keys:" >> /var/lib/gncloud/KVM/script/initcloud/user-data
+echo " - `cat ~/platform_key`" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "runcmd:" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo " - [ sh, -c, echo \" `cat ~/.ssh/id_rsa.pub`\" >> ~/.ssh/authorized_keys ] " >> \
     /var/lib/gncloud/KVM/script/initcloud/user-data
