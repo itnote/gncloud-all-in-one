@@ -30,6 +30,7 @@ mkdir -p /data/nas/images/kvm/snapshot
 mkdir -p /data/nas/images/kvm/backup
 
 mkdir -p /var/lib/gncloud
+mkdir -p /var/log/nginx
 
 # docker 버전에 따라 로그파일의 쓰기권한이 필요할수 있다
 chmod 777 /var
@@ -137,7 +138,7 @@ echo "password: fastcat=1151" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "chpasswd: {expire: False}" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "ssh_pwauth: true" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "ssh_authorized_keys:" >> /var/lib/gncloud/KVM/script/initcloud/user-data
-echo " - `cat ~/platform_key`" >> /var/lib/gncloud/KVM/script/initcloud/user-data
+echo " - `cat ~/.ssh/id_rsa.pub`" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "runcmd:" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo " - [ sh, -c, echo \" `cat ~/.ssh/id_rsa.pub`\" >> ~/.ssh/authorized_keys ] " >> \
     /var/lib/gncloud/KVM/script/initcloud/user-data
