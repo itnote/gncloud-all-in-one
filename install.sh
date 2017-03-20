@@ -1,15 +1,25 @@
 #!/bin/bash
 
 # 지앤클라우드 all in one 버전 설치
-# root, gncloud 계정 생성 - 비밀번호 gnc=1151
+# 인스톨 쉘을 다운로드 받기 전에 해야 하는
 yum -y update
+yum -y install epel-release
+yum -y install git
+mkdir -p /data/git
+cd /data/git
+git clone https://github.com/gncloud/gncloud-all-in-one.git
+cp -R /data/git/gncloud-all-in-one/KVM /var/lib/gncloud/KVM
+cp /data/git/gncloud-all-in-one/docker-compose.yml ~/docker-compose.yml
+chmod 777 /var/lib/gncloud/KVM/script/*sh
+
+rm -rf /data/git
+
 # 도커 서비스를 위해 호스트 이름은 manager로 세팅
 systemctl disable firewalld
 systemctl stop firewalld
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 
-yum -y install net-tools
-yum -y install bridge-utils
+yum -y install net-tools bridge-utils
 
 # 네트워크 정보 저장
 export IPADDR=`ip addr | grep inet | grep -v inet6 | grep -v 127.0.0.1 | tr -s ' ' |  cut -d' ' -f3 | cut -d/ -f1`
@@ -111,17 +121,6 @@ echo "$IPADDR docker-registry" >> /etc/hosts
 
 systemctl enable docker
 systemctl start docker
-
-yum -y install epel-release
-yum -y install git
-mkdir -p /data/git
-cd /data/git
-git clone https://github.com/gncloud/gncloud-all-in-one.git
-cp -R /data/git/gncloud-all-in-one/KVM /var/lib/gncloud/KVM
-cp /data/git/gncloud-all-in-one/docker-compose.yml ~/docker-compose.yml
-chmod 777 /var/lib/gncloud/KVM/script/*sh
-
-rm -rf /data/git
 
 # libvirt 설치
 yum -y install qemu-kvm libvirt virt-install bridge-utils install arp-scan genisoimage
