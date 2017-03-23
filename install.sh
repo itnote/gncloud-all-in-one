@@ -134,7 +134,7 @@ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 
 > /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "#cloud-config" >> /var/lib/gncloud/KVM/script/initcloud/user-data
-echo "password: fastcat=1151" >> /var/lib/gncloud/KVM/script/initcloud/user-data
+echo "password: gncloud" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "chpasswd: {expire: False}" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "ssh_pwauth: true" >> /var/lib/gncloud/KVM/script/initcloud/user-data
 echo "ssh_authorized_keys:" >> /var/lib/gncloud/KVM/script/initcloud/user-data
